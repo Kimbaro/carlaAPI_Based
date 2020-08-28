@@ -1,69 +1,98 @@
 import carla
-import random
-import time
+import math
 import util.Drawing_Point as drawing_point
 from util.Sort import Stack
 from agents.navigation.basic_agent import BasicAgent
+from agents.navigation.behavior_agent import BehaviorAgent  # pylint: disable=import-error
+
+import random
 
 
 class VehicleRouteManager:
-    def __init__(self, world, start_POI, end_POI, target, speed=30.0):
-        self.map = world.get_map()
+    def __init__(self, world, map, target, speed=20.0, start_POI=None, end_POI=None):
+        self.world = world
+        self.map = map
         self.debug = world.debug
         self._start_POI = start_POI  # 시작지점
         self._end_POI = end_POI  # 끝지점
-        self._vehicle = target  # 대상 차량
-        self.agent = BasicAgent(target, speed)  # 대상차량 , speed km/s
-        self.routePlannerList = [start_POI, end_POI]  # 시작지점에서 끝점 까지의 경로
+        # self.waypoints = map.generate_waypoints(5.0)
+        self.spawn_points = self.map.get_spawn_points()
+        self.speed = speed
+        self.destination_loc = None  # 타겟의 현재 경유지점
+        self.log_check = False  # 타겟차량의 속도와 이동경로 신호등
+        self.move_key = None
+
+        # self.agent = BasicAgent(target)  # 대상차량 , speed km/s
+        """
+        var name 'behavior'
+        cautious : 약한주행운전
+        normal : 기본
+        aggressive : 강한주행운전
+        
+        var name 'ignore_traffic_light'
+        True : 신호무시
+        False : 
+        """
+        self.agent = BehaviorAgent(target, ignore_traffic_light=False, behavior='normal')  # 타겟차량, 신호따름, 보통주행
         self.control = None  # carla.VehicleControl, 차량의 세부 제어.
         self.routeDestinationList = Stack()  # 경유지 목록
-        self.routeDestinationList.push(end_POI)  # 스택방식의 정렬이므로 종점을 우선 푸쉬
+        self.routePlannerList = []
 
-        drawing_point.draw_spawnpoint_info(self.debug, start_POI.transform.location, color=carla.Color(0, 255, 0),
-                                           text='START_POI',
-                                           lt=180)
-        drawing_point.draw_spawnpoint_info(self.debug, end_POI.transform.location, color=carla.Color(0, 255, 0),
-                                           text='END_POI',
-                                           lt=180)
+        # 다음 경유지 탐색 시작은 루트플래너 큐리스트에 저장된 웨이포인트가 해당 값 미만 인 경우 시작함.
+        self.num_min_waypoints = 10
+        self.test_count = 0  # 테스트용. 이후 지울것.
 
-        # self.agent.done() 내부의  localplanner는 최초 주행경로가 대입되어야 이후 주행 중이지 않을때 true를 반환함.
-        # 초기에 set_destination을 대입하지 않았을 경우 최초 주행경로가 없기 때문에 false를 반환함.
-        destination1 = target.get_location()
-        self.agent.set_destination((destination1.x, destination1.y, destination1.z))
+        target_location = target.get_location()
+        target_route_trace_wp = self.map.get_waypoint(target_location)
+        start = target_route_trace_wp.next(10)
+        end = target_route_trace_wp.next(100)
+        self.agent.set_destination(start[0].transform.location, end[0].transform.location, clean=True)
+        self.routePlannerList = self.agent._trace_route(start[0], end[0])  # 시작점과 끝나는 지점의 Waypoint list 를 반환.
 
     def add_route(self, waypoint):  # 경유할 목적지 등록.
         self.routeDestinationList.push(waypoint)
 
-    def tick(self):
-        control = self.agent.run_step()  # carla.VehicleControl
-        # print("agent.done() : ", self.agent.done())
-        if (self.agent.done()) == False:  # 현재 차량에 등록된 경유지가 있는경우.
-            drawing_point.draw_point_union(self.debug, self._vehicle.get_transform().location,
-                                           color=carla.Color(0, 255, 0),
-                                           lt=2.0)
-        else:  ### 타겟차량이 더이상 루트플랜이 없는 경우.
-            if self.routeDestinationList.is_empty():  # <- Stack
-                # 경유지 자동할당.
-                waypoint = random.choice(self.map.generate_waypoints(20.0))
-                self.routeDestinationList.push(waypoint)  # add route
-            else:
-                ### routeDestinationList 스택에 저장된 경로가 존재하는 경우
-                waypoint = self.routeDestinationList.pop()
+    def tick(self, target):
+        self.agent.update_information()
+        remaining_count = len(self.agent.get_local_planner().waypoints_queue)  # 타겟차량 루트플랜의 웨이포인트 큐 길이
+        if remaining_count < self.num_min_waypoints:
+            if remaining_count < 4:
+                if self.routeDestinationList.is_empty():  # <- 스택이 비어있음.
+                    self.test_count += 1
+                    print("system : 목적지없음. 임의 목적지 루트플랜 작성. (", self.test_count)
+                    # target_location = target.get_location()
+                    # target_route_trace_wp = self.map.get_waypoint(target_location)
+                    # start = target_route_trace_wp.next(10)
+                    # start = target_route_trace_wp.next(target_speed_text / 6.0)
+                    route = self.agent.reroute()
+                    self.routePlannerList = route  # 시작점과 끝나는 지점의 Waypoint list 를 반환
+                    # print(route[0], route[1])
+                    # self.agent.set_destination(target_route_trace_wp.transform.location, end[0].transform.location)
+                else:  # 스택에 목적지가 존재함.
+                    end = [self.routeDestinationList.pop(0)]
+                    target_location = target.get_location()
+                    target_route_trace_wp = self.map.get_waypoint(target_location)
+                    start = target_route_trace_wp.next(20)
+                    self.agent.set_destination(start[0].transform.location, end[0].transform.location)
+                    self.routePlannerList = self.agent._trace_route(start[0], end[0])
 
-                ### 차량이 현재 이동하는 목적지를 시각적으로 표현 ----
-                self.routePlannerList = self.agent._trace_route(self.map.get_waypoint(self._vehicle.get_location()),
-                                                                waypoint)  # 시작점과 끝나는 지점의 경로를 반환.
-                for routeData in self.routePlannerList:
-                    debug_start = routeData[0]  # return -> carla.Waypoint
-                    roadOption = routeData[1]  # return -> carla.RoadOption
-                    # print(debug_start)
-                    # print(roadOption, '\n')
-                    drawing_point.draw_point(self.debug, debug_start.transform.location, color=carla.Color(255, 0, 0),
-                                             lt=60.0)
+        # self.routePlannerList = self.agent._trace_route(start, end)  # 시작점과 끝나는 지점의 Waypoint list 를 반환.
+        self.agent.get_local_planner().set_speed(self.speed)  # 제어차량 평균 속도
+        control = self.agent.run_step()  # 위 로직 설정 적용 및 동작시작.
+        self.agent.vehicle.apply_control(control)  # return -> carla.VehicleControl
 
-                drawing_point.draw_point(self.debug, waypoint.transform.location, lt=60.0)  # 목적지 위치를 시각적으로 표현
-                ###---- END
-                self.agent.set_destination((waypoint.transform.location.x,
-                                            waypoint.transform.location.y,
-                                            waypoint.transform.location.z))
-        self.agent._vehicle.apply_control(control)  # return -> carla.VehicleControl
+    def request_target_speed_log(self, check=False):
+        self.agent.log_check = check
+
+# ### 차량이 현재 이동하는 목적지를 시각적으로 표현 ----
+# self.routePlannerList = self.agent._trace_route(
+#     self.map.get_waypoint(target.get_location())
+#     , self.map.get_waypoint(destination))  # 시작점과 끝나는 지점의 Waypoint list 를 반환.
+# for routeData in self.routePlannerList:
+#     debug_start = routeData[0]  # return -> carla.Waypoint
+#     roadOption = routeData[1]  # return -> carla.RoadOption
+#     # print(debug_start)
+#     # print(roadOption, '\n')
+#     drawing_point.draw_point(self.debug, debug_start.transform.location,
+#                              color=carla.Color(255, 0, 0),
+#                              lt=60.0)

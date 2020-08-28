@@ -1,7 +1,4 @@
-#!/usr/bin/env python
-
-# Copyright (c) 2018 Intel Labs.
-# authors: German Ros (german.ros@intel.com)
+# Copyright (c) # Copyright (c) 2018-2020 CVC.
 #
 # This work is licensed under the terms of the MIT license.
 # For a copy, see <https://opensource.org/licenses/MIT>.
@@ -10,12 +7,12 @@
 waypoints and avoiding other vehicles.
 The agent also responds to traffic lights. """
 
+
 import carla
 from agents.navigation.agent import Agent, AgentState
 from agents.navigation.local_planner import LocalPlanner
 from agents.navigation.global_route_planner import GlobalRoutePlanner
 from agents.navigation.global_route_planner_dao import GlobalRoutePlannerDAO
-
 
 class BasicAgent(Agent):
     """
@@ -30,16 +27,17 @@ class BasicAgent(Agent):
         """
         super(BasicAgent, self).__init__(vehicle)
 
-        self._proximity_threshold = 10.0  # meters
+        self._proximity_tlight_threshold = 5.0  # meters
+        self._proximity_vehicle_threshold = 10.0  # meters
         self._state = AgentState.NAVIGATING
         args_lateral_dict = {
             'K_P': 1,
-            'K_D': 0.02,
+            'K_D': 0.4,
             'K_I': 0,
-            'dt': 1.0 / 20.0}
+            'dt': 1.0/20.0}
         self._local_planner = LocalPlanner(
-            self._vehicle, opt_dict={'target_speed': target_speed,
-                                     'lateral_control_dict': args_lateral_dict})
+            self._vehicle, opt_dict={'target_speed' : target_speed,
+            'lateral_control_dict':args_lateral_dict})
         self._hop_resolution = 2.0
         self._path_seperation_hop = 2
         self._path_seperation_threshold = 0.5
@@ -57,7 +55,6 @@ class BasicAgent(Agent):
             carla.Location(location[0], location[1], location[2]))
 
         route_trace = self._trace_route(start_waypoint, end_waypoint)
-        assert route_trace
 
         self._local_planner.set_global_plan(route_trace)
 
@@ -95,8 +92,6 @@ class BasicAgent(Agent):
         actor_list = self._world.get_actors()
         vehicle_list = actor_list.filter("*vehicle*")
         lights_list = actor_list.filter("*traffic_light*")
-        #print(vehicle_list)
-        #print(lights_list)
 
         # check possible obstacles
         vehicle_state, vehicle = self._is_vehicle_hazard(vehicle_list)

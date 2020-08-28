@@ -5,25 +5,18 @@ from threading import Thread
 
 try:
     # 파이썬에서 참조할 모듈의 경로 및 설정
-    sys.path.append(glob.glob('carla-0.9.7*%d.%d-%s.egg' % (
+    sys.path.append(glob.glob('carla-0.9.9.4*%d.%d-%s.egg' % (
         sys.version_info.major,
         sys.version_info.minor,
         'win-amd64' if os.name == 'nt' else 'linux-x86_64'))[0])
 
 except IndexError:
     pass
-import logging
 import carla
-import random
 import pygame
 from pygame import constants as k
 import argparse
-from util.Sensors import Camera_Rgb
-from util.Sensors import Camera_Depth
-from util.Sensors import Camera_Segmentation
-from util.Sensors import Sensor_Lider
 from util.Sensors import SensorManager
-import target_control_manager
 
 vehicles_list = []
 
@@ -36,7 +29,7 @@ class KeyboardControl(object):
         self.isRecording = None
         self.check = False
 
-    def parse_events(self, sensorManager):
+    def parse_events(self, sensorManager, controller):
         if self.check:
             self.check = False
 
@@ -57,42 +50,44 @@ class KeyboardControl(object):
                     self.check = True
                     if self.check:
                         sensorManager.destroy()
+                        self.index = 0
+                        sensorManager.select_sensor(controller.index, controller.check)
                         print("F1 RGB")
-                    self.index = 0
                 elif event.key == k.K_F2:
                     self.check = True
                     if self.check:
                         sensorManager.destroy()
+                        self.index = 1
+                        sensorManager.select_sensor(controller.index, controller.check)
                         print("F2 DEPTH(Raw)")
-                    self.index = 1
                 elif event.key == k.K_F3:
                     self.check = True
                     if self.check:
                         sensorManager.destroy()
-                    print("F3 DEPTH(Gray Scale)")
-                    self.index = 2
+                        self.index = 2
+                        sensorManager.select_sensor(controller.index, controller.check)
+                    print("F3 Lidar")
                 elif event.key == k.K_F4:
-                    print("F4 DEPTH(Logarithmic Gray Scale)")
+                    self.check = True
+                    if self.check:
+                        sensorManager.destroy()
+                        sensorManager.select_sensor(controller.index, controller.check)
+                    print("F4 Lidar(Semantic)")
                     self.index = 3
-                elif event.key == k.K_F5:
-                    print("F5 Segmentation")
-                    self.index = 4
-                elif event.key == k.K_F6:
-                    print("F6 Lidar")
-                    self.index = 5
 
     @staticmethod
     def _is_quit_shortcut(key):
         return (key == k.K_ESCAPE)
 
 
+# 203.237.143.101
 def main():
     argparser = argparse.ArgumentParser(description="설정값")
     argparser.add_argument('--host', metavar='H', default='localhost', help='호스트 서버의 아이피 주소 입력.')
-    argparser.add_argument('--port', metavar='P', default=2000, type=int, help='호스트 서버의 TCP포트 입력.')
+    argparser.add_argument('--port', metavar='P', default=2001, type=int, help='호스트 서버의 TCP포트 입력.')
     argparser.add_argument('--camera', metavar='WIDTHxHEIGHT', default='1280x720', help='카메라 센서 이미지')
     argparser.add_argument(
-        '-t_id', '--target_id',
+        '-t', '--target_id',
         metavar='N',
         default=0,
         type=int,
@@ -120,28 +115,30 @@ def main():
     client = carla.Client(args.host, 2000)
     client.set_timeout(10.0)
     world = client.get_world()
-    map = world.get_map()
 
     target = world.get_actor(args.target_id)  # 타겟 차량 Actor_id
     print("select vehicle : ", target)
     # Sensors Spawn
     sensorManager = SensorManager(world, target, args)
-
+    sensorManager.select_sensor(controller.index, controller.check)
+    world.wait_for_tick()
     try:
         clock = pygame.time.Clock()
         while True:
             clock.tick(60)
-            if controller.parse_events(sensorManager):
+            if controller.parse_events(sensorManager, controller):
                 return
             world.tick()
-            sensorManager.select_sensor(controller.index, controller.check).render(display)
+
+            sensorManager.sensor.render(display)
             pygame.display.flip()
     finally:
         print('\ndestroying %d vehicles' % len(vehicles_list))
         sensorManager.destroy()
-        for actor in vehicles_list:
-            actor.destroy()
+        # for actor in vehicles_list:
+        #     actor.destroy()
         pygame.quit()
+        sys.exit()
 
 
 if __name__ == '__main__':

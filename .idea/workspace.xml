@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ChangeListManager">
+    <list default="true" id="cd25e965-ba73-46ce-a1fa-c497079e49f9" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/.gitignore" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/5.VehicleManagement.iml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/inspectionProfiles/profiles_settings.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/agents/navigation/__init__.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/agents/navigation/agent.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/agents/navigation/basic_agent.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/agents/navigation/controller.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/agents/navigation/global_route_planner.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/agents/navigation/global_route_planner_dao.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/agents/navigation/local_planner.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/agents/navigation/roaming_agent.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/agents/tools/__init__.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/agents/tools/misc.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/carla-0.9.7-py3.8-win-amd64.egg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/npc_spawn.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/sensor/a0/00028113.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/sensors_data_collection.py" beforeDir="false" afterPath="$PROJECT_DIR$/sensors_data_collection.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target_control_manager.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/util/Drawing_Point.py" beforeDir="false" afterPath="$PROJECT_DIR$/util/Drawing_Point.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/util/Sensors.py" beforeDir="false" afterPath="$PROJECT_DIR$/util/Sensors.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/util/VehicleRouteManager.py" beforeDir="false" afterPath="$PROJECT_DIR$/util/VehicleRouteManager.py" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="ProjectId" id="1gUQUmzYCaDtsRZe4vg4C5mvbUf" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showExcludedFiles" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">
+    <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
+    <property name="WebServerToolWindowFactoryState" value="false" />
+  </component>
+  <component name="SvnConfiguration">
+    <configuration />
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="cd25e965-ba73-46ce-a1fa-c497079e49f9" name="Default Changelist" comment="" />
+      <created>1598166708643</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1598166708643</updated>
+      <workItem from="1598166709979" duration="50000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="1" />
+  </component>
+</project>

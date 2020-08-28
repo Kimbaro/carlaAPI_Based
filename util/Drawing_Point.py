@@ -25,7 +25,7 @@ white = carla.Color(255, 255, 255)
 
 
 def draw_point(debug, location, color=carla.Color(255, 0, 0), lt=-0.1):
-    debug.draw_point(location + carla.Location(z=0.25), 0.1, color, lt)
+    debug.draw_point(location + carla.Location(z=0.25), 0.05, color, lt)
     # debug.draw_point(location + carla.Location(z=0.25), 0.1, color, lt, False)
 
 
@@ -119,22 +119,21 @@ def spawnPoints_viewer(world, map):
     print("rotation : " + str(rt.pitch) + " , " + str(rt.roll) + " , " + str(rt.yaw))
     print("location : " + str(lt.x) + " , " + str(lt.y) + " , " + str(lt.z))
 
-
-def main():
-    client = carla.Client('localhost', 2000)
-    client.set_timeout(10.0)
-    world = client.get_world()
-    map = world.get_map()
-
-    x = input('\ns=Spawnpoint , w=Waypoint : ')
-    if str(x) == 'w':
-        waypoints_viewer(world, map)
-    elif str(x) == 's':
-        spawnPoints_viewer(world, map)
-
-
-if __name__ == '__main__':
-    try:
-        main()
-    except KeyboardInterrupt:
-        print('\nCancelled by user. Bye!')
+# def main():
+#     client = carla.Client('localhost', 2000)
+#     client.set_timeout(10.0)
+#     world = client.get_world()
+#     map = world.get_map()
+#
+#     x = input('\ns=Spawnpoint , w=Waypoint : ')
+#     if str(x) == 'w':
+#         waypoints_viewer(world, map)
+#     elif str(x) == 's':
+#         spawnPoints_viewer(world, map)
+#
+#
+# if __name__ == '__main__':
+#     try:
+#         main()
+#     except KeyboardInterrupt:
+#         print('\nCancelled by user. Bye!')
