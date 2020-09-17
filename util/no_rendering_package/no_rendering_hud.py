@@ -111,7 +111,7 @@ class HUD_Main(object):
         default_font = 'ubuntumono'
         mono = default_font if default_font in fonts else fonts[0]
         mono = pygame.font.match_font(mono)
-        self._font_mono = pygame.font.Font(mono, 14)
+        self._font_mono = pygame.font.Font(mono, 12)
         self._header_font = pygame.font.SysFont('Arial', 14, True)
         self.help = HUD_Text(pygame.font.Font(mono, 24), *self.dim)
         self._notifications = ALERT_Text(

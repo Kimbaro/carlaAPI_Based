@@ -140,20 +140,20 @@ class BehaviorAgent(Agent):
 
     def reroute(self):
         """
-        This method implements re-routing for vehicles approaching its destination.
-        It finds a new target and computes another path to reach it.
-
-            :param spawn_points: list of possible destinations for the agent
+        현 타겟 차량의 현재 위치를 기준으로 Waypoint 20만큼의 거리를 시작점으로 출발하여 목적지 200만큼의 거리만큼 주행함.
         """
-
-        print("Target almost reached, setting new destination...")
         target_location = self.vehicle.get_location()
         target_route_trace_wp = self.map.get_waypoint(target_location)
-
-        start = target_route_trace_wp.next(20)
-        end = target_route_trace_wp.next(200)
-        destination_s = start[0].transform.location
-        destination_e = end[0].transform.location
+        wp_next = get_speed(self.vehicle)
+        start = target_route_trace_wp.next(wp_next)
+        end = target_route_trace_wp.next(wp_next+30)
+        print("select start node : ", start, len(start))
+        if len(start) > 1:
+            destination_s = random.choice(start).transform.location
+            destination_e = end[0].transform.location
+        else:
+            destination_s = start[0].transform.location
+            destination_e = end[0].transform.location
 
         self.set_destination(destination_s, destination_e)
         return self._trace_route(start[0], end[0])

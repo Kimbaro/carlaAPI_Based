@@ -4,7 +4,7 @@ import sys
 
 try:
     # 파이썬에서 참조할 모듈의 경로 및 설정
-    sys.path.append(glob.glob('carla-0.9.9*%d.%d-%s.egg' % (
+    sys.path.append(glob.glob('carla-0.9.9.4*%d.%d-%s.egg' % (
         sys.version_info.major,
         sys.version_info.minor,
         'win-amd64' if os.name == 'nt' else 'linux-x86_64'))[0])
@@ -14,8 +14,14 @@ except IndexError:
 
 import carla
 
+import util.no_rendering_package.no_rendering_hud as hud_util
+import util.no_rendering_package.no_rendering_keyEvent as key_util
+import util.no_rendering_package.no_rendering_core as core_util
+from util.VehicleRouteManager import VehicleRouteManager
+
 import argparse
 import random
+import math
 
 try:
     import pygame
@@ -41,6 +47,7 @@ try:
     from pygame.locals import K_q
     from pygame.locals import K_s
     from pygame.locals import K_w
+    from pygame import constants as k
 except ImportError:
     raise RuntimeError('cannot import pygame, make sure pygame package is installed')
 
@@ -61,7 +68,7 @@ def main():
     argparser.add_argument(
         '--host',
         metavar='H',
-        default='127.0.0.1',
+        default='localhost',
         help='IP of the host server (default: 127.0.0.1)')
     argparser.add_argument(
         '-p', '--port',
@@ -72,7 +79,7 @@ def main():
     argparser.add_argument(
         '--res',
         metavar='WIDTHxHEIGHT',
-        default='1280x720',
+        default='920x600',
         help='window resolution (default: 1280x720)')
     argparser.add_argument(
         '--filter',
@@ -104,70 +111,78 @@ def main():
     args = argparser.parse_args()
     args.width, args.height = [int(x) for x in args.res.split('x')]
 
-    # Init Pygame
-    pygame.init()
-    display = pygame.display.set_mode(
-        (args.width, args.height),
-        pygame.HWSURFACE | pygame.DOUBLEBUF)
+    try:
+        # Init Pygame
+        pygame.init()
 
-    # Place a title to game window
-    pygame.display.set_caption("pygame_set_caption")
+        display = pygame.display.set_mode(
+            (args.width, args.height),
+            pygame.HWSURFACE | pygame.DOUBLEBUF)
 
-    # Show loading screen
-    font = pygame.font.Font(pygame.font.get_default_font(), 20)
-    text_surface = font.render('show_loading_text', True, no_rendering_util.COLOR_WHITE)
-    display.blit(text_surface, text_surface.get_rect(center=(args.width / 2, args.height / 2)))
-    pygame.display.flip()
+        # Place a title to game window
+        pygame.display.set_caption("pygame_set_caption")
+        # Show loading screen
+        font = pygame.font.SysFont('Arial', 20)
+        # font = pygame.font.Font(pygame.font.get_default_font(), 20)
+        text_surface = font.render('show_loading_text', True, no_rendering_util.COLOR_WHITE)
+        display.blit(text_surface, text_surface.get_rect(center=(args.width / 2, args.height / 2)))
 
-    # Carla init
-    client = carla.Client(args.host, 2000)
-    client.set_timeout(10.0)
-    world = client.get_world()
-    settings = world.get_settings()
-    settings.no_rendering_mode = True
-    world.apply_settings(settings)
-    map = world.get_map()
-
-    # modules set
-    input_control = no_rendering_util.InputControl("input control title")
-    print("test :: ", input_control.__doc__.split("\n"))
-    hud = no_rendering_util.HUD("hud title", args.width, args.height)
-    rendering_world = no_rendering_util.World(world, "rendering core module title", args, timeout=2.0)
-
-    # modules start
-    input_control.start(hud, rendering_world)
-    hud.start()
-    rendering_world.start(hud, input_control)
-
-    # select spawn point
-    spawnpoints = map.get_spawn_points()
-    spawnpoint = random.choice(spawnpoints)
-    blueprints = world.get_blueprint_library().filter('vehicle.*')
-
-    # TARGET Vehicles Spawn
-    blueprint = random.choice([x for x in blueprints if int(x.get_attribute('number_of_wheels')) == 4])
-    target = world.try_spawn_actor(blueprint, spawnpoint)
-
-    # Game loop
-    clock = pygame.time.Clock()
-    while True:
-        clock.tick_busy_loop(60)
-
-        # Tick all modules
-        rendering_world.tick(clock)
-        hud.tick(clock)
-        input_control.tick(clock)
-
-        # Render all modules
-        display.fill(no_rendering_util.COLOR_ALUMINIUM_4)
-        rendering_world.render(display)
-        hud.render(display)
-        input_control.render(display)
         pygame.display.flip()
+
+        # Carla init
+        client = carla.Client(args.host, 2000)
+        client.set_timeout(10.0)
+        world = client.get_world()
+        map = world.get_map()
+
+        # select spawn point
+        spawnpoints = map.get_spawn_points()
+        spawnpoint = random.choice(spawnpoints)
+        blueprints = world.get_blueprint_library().filter('vehicle.*')
+
+        # TARGET Vehicles Spawn
+        blueprint = random.choice([x for x in blueprints if int(x.get_attribute('number_of_wheels')) == 4])
+        blueprint.set_attribute('role_name', 'hero')
+        target = world.try_spawn_actor(blueprint, spawnpoint)
+
+        # modules init
+        input_control = key_util.InputControl("input control title", world, map)
+        hud = hud_util.HUD_Main("hud title", args.width, args.height)
+        rendering_world = core_util.World(client, target, "Simulator Info", args, timeout=2.0)
+
+        ### 경로추적 생성.
+        start_POI = map.get_waypoint(spawnpoint.location)
+        routeManager = VehicleRouteManager(world, map, target, 20, start_POI)
+
+        # modules start
+        input_control.start(hud, rendering_world)
+        hud.start()
+        rendering_world.start(hud, input_control)
+
+        # Game loop
+        clock = pygame.time.Clock()
+        while True:
+            clock.tick_busy_loop(60)
+
+            # Tick all modules
+            routeManager.tick(target)
+            rendering_world.tick(clock, routeManager)
+            hud.tick(clock)
+            input_control.tick(clock, routeManager)
+
+            # Render all modules
+            display.fill(no_rendering_util.COLOR_ALUMINIUM_4)
+            rendering_world.render(display, routeManager)
+            hud.render(display)
+            input_control.render(display)
+            pygame.display.flip()
+    except KeyboardInterrupt:
+        print('\nCancelled by user. Bye!')
+    finally:
+        target.destroy()
+        rendering_world.destroy()
+        return
 
 
 if __name__ == '__main__':
-    try:
-        main()
-    except KeyboardInterrupt:
-        print('\nCancelled by user. Bye!')
+    main()

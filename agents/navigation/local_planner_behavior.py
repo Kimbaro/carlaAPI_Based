@@ -68,7 +68,7 @@ class LocalPlanner(object):
         self._global_plan = None
         self._pid_controller = None
         self.waypoints_queue = deque(maxlen=20000)  # queue with tuples of (waypoint, RoadOption)
-        self._buffer_size = 2
+        self._buffer_size = 1
         self._waypoint_buffer = deque(maxlen=self._buffer_size)
 
         self._init_controller()  # initializing controller

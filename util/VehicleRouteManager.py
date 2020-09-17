@@ -39,13 +39,13 @@ class VehicleRouteManager:
         self.routePlannerList = []
 
         # 다음 경유지 탐색 시작은 루트플래너 큐리스트에 저장된 웨이포인트가 해당 값 미만 인 경우 시작함.
-        self.num_min_waypoints = 10
+        self.num_min_waypoints = 5
         self.test_count = 0  # 테스트용. 이후 지울것.
 
         target_location = target.get_location()
         target_route_trace_wp = self.map.get_waypoint(target_location)
-        start = target_route_trace_wp.next(10)
-        end = target_route_trace_wp.next(100)
+        start = target_route_trace_wp.next(20)
+        end = target_route_trace_wp.next(90)
         self.agent.set_destination(start[0].transform.location, end[0].transform.location, clean=True)
         self.routePlannerList = self.agent._trace_route(start[0], end[0])  # 시작점과 끝나는 지점의 Waypoint list 를 반환.
 
@@ -60,14 +60,9 @@ class VehicleRouteManager:
                 if self.routeDestinationList.is_empty():  # <- 스택이 비어있음.
                     self.test_count += 1
                     print("system : 목적지없음. 임의 목적지 루트플랜 작성. (", self.test_count)
-                    # target_location = target.get_location()
-                    # target_route_trace_wp = self.map.get_waypoint(target_location)
-                    # start = target_route_trace_wp.next(10)
-                    # start = target_route_trace_wp.next(target_speed_text / 6.0)
                     route = self.agent.reroute()
                     self.routePlannerList = route  # 시작점과 끝나는 지점의 Waypoint list 를 반환
                     # print(route[0], route[1])
-                    # self.agent.set_destination(target_route_trace_wp.transform.location, end[0].transform.location)
                 else:  # 스택에 목적지가 존재함.
                     end = [self.routeDestinationList.pop(0)]
                     target_location = target.get_location()

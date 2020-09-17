@@ -648,7 +648,8 @@ class World(object):
         self._hud = hud
         self._input = input_control
 
-        self.original_surface_size = min(self._hud.dim[0], self._hud.dim[1])
+        # 화면 전체 사이즈
+        self.original_surface_size = max(self._hud.dim[0] + 200, self._hud.dim[1])
         self.surface_size = self.map_image.big_map_surface.get_width()
 
         self.scaled_size = int(self.surface_size)
@@ -666,10 +667,26 @@ class World(object):
         self.border_round_surface.fill(c.COLOR_BLACK)
 
         # Used for Hero Mode, draws the map contained in a circle with white border
-        center_offset = (int(self._hud.dim[0] / 2), int(self._hud.dim[1] / 2))
-        pygame.draw.circle(self.border_round_surface, c.COLOR_ALUMINIUM_1, center_offset, int(self._hud.dim[1] / 2))
-        pygame.draw.circle(self.border_round_surface, c.COLOR_WHITE, center_offset, int((self._hud.dim[1] - 8) / 2))
 
+        # 렌더링이미지 사이즈 (사각형 x, y, w, h)
+        center_offset = [int(self._hud.dim[0] / 2) - 460, int(self._hud.dim[1] / 2) - 300, int(self._hud.dim[0]),
+                         self._hud.dim[1]]
+
+        # 렌더링이미지 사이즈 (원)
+        # center_offset2 = [int(self._hud.dim[0] / 2), int(self._hud.dim[1] / 2)]
+        # center_offset3 = [0,0,int(self._hud.dim[0]), int(self._hud.dim[1])]
+
+        # 원 형태 그리기 _ 틀
+        # pygame.draw.circle(self.border_round_surface, c.COLOR_ALUMINIUM_1, center_offset, int(self._hud.dim[1] / 2))
+
+        # 사각형 형태 그리기 _ 틀
+        # pygame.draw.rect(self.border_round_surface, c.COLOR_ALUMINIUM_1, center_offset, 15)
+
+        # 원 형태 그리기 _ 내용 ( 전체화면 )
+        # pygame.draw.circle(self.border_round_surface, c.COLOR_WHITE, center_offset, int((self._hud.dim[1])))
+
+        # 사각형 형태 그리기 _ 내용 ( 정사각형 )
+        pygame.draw.rect(self.border_round_surface, c.COLOR_WHITE, center_offset)
         scaled_original_size = self.original_surface_size * (1.0 / 0.9)
         self.hero_surface = pygame.Surface((scaled_original_size, scaled_original_size)).convert()
 
@@ -805,7 +822,7 @@ class World(object):
 
         self._hud.add_info(self.name, info_text)
         self._hud.add_info('STATUS', hero_mode_text)
-        self._hud.add_info('SENSOR', sensor_text)
+        self._hud.add_info('LOCATION', sensor_text)
 
     @staticmethod
     def on_world_tick(weak_self, timestamp):

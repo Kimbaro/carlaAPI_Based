@@ -1,38 +1,53 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="cd25e965-ba73-46ce-a1fa-c497079e49f9" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/.gitignore" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/5.VehicleManagement.iml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/inspectionProfiles/profiles_settings.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/agents/navigation/__init__.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/agents/navigation/agent.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/agents/navigation/basic_agent.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/agents/navigation/controller.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/agents/navigation/global_route_planner.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/agents/navigation/global_route_planner_dao.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/agents/navigation/local_planner.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/agents/navigation/roaming_agent.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/agents/tools/__init__.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/agents/tools/misc.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/carla-0.9.7-py3.8-win-amd64.egg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/npc_spawn.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/sensor/a0/00028113.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/sensors_data_collection.py" beforeDir="false" afterPath="$PROJECT_DIR$/sensors_data_collection.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target_control_manager.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/util/Drawing_Point.py" beforeDir="false" afterPath="$PROJECT_DIR$/util/Drawing_Point.py" afterDir="false" />
+    <list default="true" id="cd25e965-ba73-46ce-a1fa-c497079e49f9" name="Default Changelist" comment="no_rendering change screen">
+      <change afterPath="$PROJECT_DIR$/util/no_rendering_package/.idea/inspectionProfiles/profiles_settings.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/util/no_rendering_package/.idea/misc.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/util/no_rendering_package/.idea/modules.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/util/no_rendering_package/.idea/no_rendering_package.iml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/util/no_rendering_package/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Case1.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/agents/navigation/behavior_agent.py" beforeDir="false" afterPath="$PROJECT_DIR$/agents/navigation/behavior_agent.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/agents/navigation/local_planner_behavior.py" beforeDir="false" afterPath="$PROJECT_DIR$/agents/navigation/local_planner_behavior.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/automatic_control_myEdit.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/no_rendering_mode.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/sensors_data_collection.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/spawn_npc.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target_control_manager.py" beforeDir="false" afterPath="$PROJECT_DIR$/target_control_manager" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test_no_rendering.py" beforeDir="false" afterPath="$PROJECT_DIR$/screen_in_no_rendering_mode.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/util/Geo_Sensors.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/util/KeyboardControl.py" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/util/Sensors.py" beforeDir="false" afterPath="$PROJECT_DIR$/util/Sensors.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/util/VehicleRouteManager.py" beforeDir="false" afterPath="$PROJECT_DIR$/util/VehicleRouteManager.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/util/backup/VehicleRouteManager.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/util/backup/no_rendering_core.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/util/backup/no_rendering_util.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/util/backup/target_control_manager.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/util/backup/test_no_rendering.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/util/no_rendering_package/no_rendering_core.py" beforeDir="false" afterPath="$PROJECT_DIR$/util/no_rendering_package/no_rendering_core.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/util/no_rendering_package/no_rendering_hud.py" beforeDir="false" afterPath="$PROJECT_DIR$/util/no_rendering_package/no_rendering_hud.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/util/no_rendering_package/no_rendering_util.py" beforeDir="false" afterPath="$PROJECT_DIR$/util/no_rendering_package/no_rendering_util.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Python Script" />
+      </list>
+    </option>
+  </component>
   <component name="Git.Settings">
+    <option name="RECENT_BRANCH_BY_REPOSITORY">
+      <map>
+        <entry key="$PROJECT_DIR$" value="master" />
+      </map>
+    </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="ProjectId" id="1gUQUmzYCaDtsRZe4vg4C5mvbUf" />
@@ -43,7 +58,19 @@
   </component>
   <component name="PropertiesComponent">
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
+    <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/util" />
+  </component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\kim\Desktop\새 폴더 (4)\Autopilot-Sensor-Collection-Project\util" />
+      <recent name="C:\Users\kim\Desktop\새 폴더 (4)\Autopilot-Sensor-Collection-Project\util\backup" />
+    </key>
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Users\kim\Desktop\새 폴더 (4)\Autopilot-Sensor-Collection-Project\util" />
+      <recent name="C:\Users\kim\Desktop\새 폴더 (4)\Autopilot-Sensor-Collection-Project" />
+    </key>
   </component>
   <component name="SvnConfiguration">
     <configuration />
@@ -56,10 +83,21 @@
       <option name="presentableId" value="Default" />
       <updated>1598166708643</updated>
       <workItem from="1598166709979" duration="50000" />
+      <workItem from="1600329075386" duration="10704000" />
     </task>
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="1" />
+  </component>
+  <component name="WindowStateProjectService">
+    <state x="-1230" y="266" key="#com.intellij.refactoring.safeDelete.UnsafeUsagesDialog" timestamp="1600338362202">
+      <screen x="-1920" y="0" width="1920" height="1040" />
+    </state>
+    <state x="-1230" y="266" key="#com.intellij.refactoring.safeDelete.UnsafeUsagesDialog/0.0.1920.1040/-1920.0.1920.1040@-1920.0.1920.1040" timestamp="1600338362202" />
+    <state x="-1390" y="112" key="CommitChangelistDialog2" timestamp="1600248599426">
+      <screen x="-1920" y="0" width="1920" height="1040" />
+    </state>
+    <state x="-1390" y="112" key="CommitChangelistDialog2/0.0.1920.1040/-1920.0.1920.1040@-1920.0.1920.1040" timestamp="1600248599426" />
   </component>
 </project>
