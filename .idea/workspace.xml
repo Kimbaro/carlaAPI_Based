@@ -2,33 +2,10 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="cd25e965-ba73-46ce-a1fa-c497079e49f9" name="Default Changelist" comment="no_rendering change screen">
-      <change afterPath="$PROJECT_DIR$/util/no_rendering_package/.idea/inspectionProfiles/profiles_settings.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/util/no_rendering_package/.idea/misc.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/util/no_rendering_package/.idea/modules.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/util/no_rendering_package/.idea/no_rendering_package.iml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/util/no_rendering_package/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Case1.py" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/agents/navigation/behavior_agent.py" beforeDir="false" afterPath="$PROJECT_DIR$/agents/navigation/behavior_agent.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/agents/navigation/local_planner_behavior.py" beforeDir="false" afterPath="$PROJECT_DIR$/agents/navigation/local_planner_behavior.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/automatic_control_myEdit.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/no_rendering_mode.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/sensors_data_collection.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/spawn_npc.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target_control_manager.py" beforeDir="false" afterPath="$PROJECT_DIR$/target_control_manager" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test_no_rendering.py" beforeDir="false" afterPath="$PROJECT_DIR$/screen_in_no_rendering_mode.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/util/Geo_Sensors.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/util/KeyboardControl.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/util/Sensors.py" beforeDir="false" afterPath="$PROJECT_DIR$/util/Sensors.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/util/VehicleRouteManager.py" beforeDir="false" afterPath="$PROJECT_DIR$/util/VehicleRouteManager.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/util/backup/VehicleRouteManager.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/util/backup/no_rendering_core.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/util/backup/no_rendering_util.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/util/backup/target_control_manager.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/util/backup/test_no_rendering.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/util/no_rendering_package/no_rendering_core.py" beforeDir="false" afterPath="$PROJECT_DIR$/util/no_rendering_package/no_rendering_core.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/util/no_rendering_package/no_rendering_hud.py" beforeDir="false" afterPath="$PROJECT_DIR$/util/no_rendering_package/no_rendering_hud.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/util/no_rendering_package/no_rendering_util.py" beforeDir="false" afterPath="$PROJECT_DIR$/util/no_rendering_package/no_rendering_util.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -60,7 +37,7 @@
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/util" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
   </component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
@@ -84,6 +61,7 @@
       <updated>1598166708643</updated>
       <workItem from="1598166709979" duration="50000" />
       <workItem from="1600329075386" duration="10704000" />
+      <workItem from="1602660375101" duration="6969000" />
     </task>
     <servers />
   </component>

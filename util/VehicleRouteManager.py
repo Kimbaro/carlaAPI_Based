@@ -33,19 +33,19 @@ class VehicleRouteManager:
         True : 신호무시
         False : 
         """
-        self.agent = BehaviorAgent(target, ignore_traffic_light=False, behavior='normal')  # 타겟차량, 신호따름, 보통주행
+        self.agent = BehaviorAgent(target, ignore_traffic_light=True, behavior='normal')  # 타겟차량, 신호따름, 보통주행
         self.control = None  # carla.VehicleControl, 차량의 세부 제어.
         self.routeDestinationList = Stack()  # 경유지 목록
         self.routePlannerList = []
 
         # 다음 경유지 탐색 시작은 루트플래너 큐리스트에 저장된 웨이포인트가 해당 값 미만 인 경우 시작함.
-        self.num_min_waypoints = 5
+        self.num_min_waypoints = 10
         self.test_count = 0  # 테스트용. 이후 지울것.
 
         target_location = target.get_location()
         target_route_trace_wp = self.map.get_waypoint(target_location)
-        start = target_route_trace_wp.next(20)
-        end = target_route_trace_wp.next(90)
+        start = target_route_trace_wp.next(5)
+        end = target_route_trace_wp.next(10)
         self.agent.set_destination(start[0].transform.location, end[0].transform.location, clean=True)
         self.routePlannerList = self.agent._trace_route(start[0], end[0])  # 시작점과 끝나는 지점의 Waypoint list 를 반환.
 
@@ -56,20 +56,24 @@ class VehicleRouteManager:
         self.agent.update_information()
         remaining_count = len(self.agent.get_local_planner().waypoints_queue)  # 타겟차량 루트플랜의 웨이포인트 큐 길이
         if remaining_count < self.num_min_waypoints:
-            if remaining_count < 4:
+            if remaining_count <= 1:
                 if self.routeDestinationList.is_empty():  # <- 스택이 비어있음.
                     self.test_count += 1
                     print("system : 목적지없음. 임의 목적지 루트플랜 작성. (", self.test_count)
-                    route = self.agent.reroute()
+                    route = self.agent.reroute_auto()
                     self.routePlannerList = route  # 시작점과 끝나는 지점의 Waypoint list 를 반환
                     # print(route[0], route[1])
                 else:  # 스택에 목적지가 존재함.
                     end = [self.routeDestinationList.pop(0)]
-                    target_location = target.get_location()
-                    target_route_trace_wp = self.map.get_waypoint(target_location)
-                    start = target_route_trace_wp.next(20)
-                    self.agent.set_destination(start[0].transform.location, end[0].transform.location)
-                    self.routePlannerList = self.agent._trace_route(start[0], end[0])
+                    route = self.agent.reroute_self(end)
+                    self.routePlannerList = route
+
+                    # target_location = target.get_location()
+                    # self.agent.get_speed(self.vehicle) * 0.6
+                    # target_route_trace_wp = self.map.get_waypoint(target_location)
+                    # start = target_route_trace_wp.next(10)
+                    # self.agent.set_destination(start[0].transform.location, end[0].transform.location)
+                    # self.routePlannerList = self.agent._trace_route(start[0], end[0])
 
         # self.routePlannerList = self.agent._trace_route(start, end)  # 시작점과 끝나는 지점의 Waypoint list 를 반환.
         self.agent.get_local_planner().set_speed(self.speed)  # 제어차량 평균 속도

@@ -106,7 +106,7 @@ class LocalPlanner(object):
             'K_P': 0.68,
             'K_D': 0.4,
             'K_I': 0.5,
-            'dt': 1.0 / self.FPS}
+            'dt': 0.5 / self.FPS}
         self.args_long_hw_dict = {
             'K_P': 0.37,
             'K_D': 0.024,
@@ -117,6 +117,12 @@ class LocalPlanner(object):
             'K_D': 0.05,
             'K_I': 0.07,
             'dt': 1.0 / self.FPS}
+
+        # self.args_long_city_dict = {
+        #     'K_P': 0.15,
+        #     'K_D': 0.05,
+        #     'K_I': 0.07,
+        #     'dt': 1.0 / self.FPS}
 
         # self.args_lat_city_dict = {
         #     'K_P': 0.58,

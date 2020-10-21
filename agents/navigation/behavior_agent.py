@@ -138,15 +138,35 @@ class BehaviorAgent(Agent):
 
         self._local_planner.set_global_plan(route_trace)
 
-    def reroute(self):
+    def reroute_auto(self):
         """
-        현 타겟 차량의 현재 위치를 기준으로 Waypoint 20만큼의 거리를 시작점으로 출발하여 목적지 200만큼의 거리만큼 주행함.
+        wp_next : 현 타겟 차량의 속도 * n 한 만큼의 거리를 시작지점으로 주행을 시작함.
         """
         target_location = self.vehicle.get_location()
         target_route_trace_wp = self.map.get_waypoint(target_location)
-        wp_next = get_speed(self.vehicle)
+        wp_next = get_speed(self.vehicle)*0.6
         start = target_route_trace_wp.next(wp_next)
         end = target_route_trace_wp.next(wp_next+30)
+        print("select start node : ", start, len(start))
+        if len(start) > 1:
+            destination_s = random.choice(start).transform.location
+            destination_e = end[0].transform.location
+        else:
+            destination_s = start[0].transform.location
+            destination_e = end[0].transform.location
+
+        self.set_destination(destination_s, destination_e)
+        return self._trace_route(start[0], end[0])
+
+    def reroute_self(self, end_point):
+        """
+        wp_next : 현 타겟 차량의 속도 * n 한 만큼의 거리를 시작지점으로 주행을 시작함.
+        """
+        target_location = self.vehicle.get_location()
+        target_route_trace_wp = self.map.get_waypoint(target_location)
+        wp_next = get_speed(self.vehicle) * 0.6
+        start = target_route_trace_wp.next(wp_next)
+        end = end_point
         print("select start node : ", start, len(start))
         if len(start) > 1:
             destination_s = random.choice(start).transform.location
