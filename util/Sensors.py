@@ -6,36 +6,6 @@ import numpy as np
 
 try:
     import pygame
-    from pygame.locals import KMOD_CTRL
-    from pygame.locals import KMOD_SHIFT
-    from pygame.locals import K_0
-    from pygame.locals import K_9
-    from pygame.locals import K_BACKQUOTE
-    from pygame.locals import K_BACKSPACE
-    from pygame.locals import K_COMMA
-    from pygame.locals import K_DOWN
-    from pygame.locals import K_ESCAPE
-    from pygame.locals import K_F1
-    from pygame.locals import K_LEFT
-    from pygame.locals import K_PERIOD
-    from pygame.locals import K_RIGHT
-    from pygame.locals import K_SLASH
-    from pygame.locals import K_SPACE
-    from pygame.locals import K_TAB
-    from pygame.locals import K_UP
-    from pygame.locals import K_a
-    from pygame.locals import K_c
-    from pygame.locals import K_g
-    from pygame.locals import K_d
-    from pygame.locals import K_h
-    from pygame.locals import K_m
-    from pygame.locals import K_p
-    from pygame.locals import K_q
-    from pygame.locals import K_r
-    from pygame.locals import K_s
-    from pygame.locals import K_w
-    from pygame.locals import K_MINUS
-    from pygame.locals import K_EQUALS
 except ImportError:
     raise RuntimeError('cannot import pygame, make sure pygame package is installed')
 
@@ -63,19 +33,19 @@ sensor_camera_segmentation = [['sensor.camera.semantic_segmentation', cc.CitySca
                                'c1', {}]]
 
 sensor_lidar = [['sensor.lidar.ray_cast', 'd0', {
-    'channels': '128',
-    'range': '100',
-    'points_per_second': '120000',
-    'rotation_frequency': '20.0',
-    'upper_fov': '15.0',  # 상단
+    'channels': '60',
+    'range': '50',
+    'points_per_second': '100000',
+    'rotation_frequency': '40.0',
+    'upper_fov': '20.0',  # 상단
     'lower_fov': '-20.0',  # 하단
     'sensor_tick': '0.0'
-}], ['sensor.lidar.ray_cast', 'd1', {
-    'channels': '128',
+}], ['sensor.lidar.ray_cast_semantic', 'd1', {
+    'channels': '60',
     'range': '50',
-    'points_per_second': '120000',
-    'rotation_frequency': '20.0',
-    'upper_fov': '15.0',  # 상단
+    'points_per_second': '100000',
+    'rotation_frequency': '40.0',
+    'upper_fov': '20.0',  # 상단
     'lower_fov': '-20.0',  # 하단
     'sensor_tick': '0.0'
 }]]
@@ -90,7 +60,7 @@ sensor_other = [['sensor.other.collision'],
 transforms = [
     carla.Transform(carla.Location(x=0.8, z=1.7)),
     carla.Transform(carla.Location(x=-5.5, z=2.5)),
-    carla.Transform(carla.Location(0, 0, 1.5), carla.Rotation(0, 0, 0))
+    carla.Transform(carla.Location(0, 0, 2.3), carla.Rotation(0, 0, 0))
 ]
 
 # self.sensor = self._parent.get_world().spawn_actor(
@@ -120,7 +90,7 @@ class Camera_Rgb:
         bp.set_attribute('image_size_x', str(config.width))
         bp.set_attribute('image_size_y', str(config.height))
         bp.set_attribute('fov', '110')
-        bp.set_attribute('sensor_tick', str(tick))
+        # bp.set_attribute('sensor_tick', str(tick))
         # 감마 설정 시
         # if bp.has_attribute('gamma'):
         #     bp.set_attribute('gamma', str(gamma_correction))
@@ -181,7 +151,7 @@ class Camera_Depth:
         bp.set_attribute('image_size_x', str(config.width))
         bp.set_attribute('image_size_y', str(config.height))
         bp.set_attribute('fov', '110')
-        bp.set_attribute('sensor_tick', str(tick))
+        # bp.set_attribute('sensor_tick', str(tick))
         # 감마 설정 시
         # if bp.has_attribute('gamma'):
         #     bp.set_attribute('gamma', str(gamma_correction))
@@ -222,7 +192,7 @@ class Camera_Depth:
 
 
 class Camera_Segmentation:
-    def __init__(self, world, target, config, select_sensor=0, tick=10):
+    def __init__(self, world, target, config, select_sensor=0, tick=0):
         self.world = world
         self.bp_library = world.get_blueprint_library()
         self.target = target
@@ -237,7 +207,7 @@ class Camera_Segmentation:
         bp.set_attribute('image_size_x', str(config.width))
         bp.set_attribute('image_size_y', str(config.height))
         bp.set_attribute('fov', '110')
-        bp.set_attribute('sensor_tick', str(tick))
+        # bp.set_attribute('sensor_tick', str(tick))
         # 감마 설정 시
         # if bp.has_attribute('gamma'):
         #     bp.set_attribute('gamma', str(gamma_correction))
@@ -293,6 +263,9 @@ class Sensor_Lider:
         bp = bp_library.find(item[0])
         for attr_name, attr_value in item[2].items():
             bp.set_attribute(attr_name, attr_value)
+            if attr_name == str('range'):
+                print("check=====")
+                self.lidar_range = float(attr_value)
 
         sensor = self.world.spawn_actor(bp, transforms[2], attach_to=self.target)
         print("생성 차량 id : ", sensor.id)
@@ -312,13 +285,13 @@ class Sensor_Lider:
         points = np.frombuffer(image.raw_data, dtype=np.dtype('f4'))
         points = np.reshape(points, (int(points.shape[0] / 3), 3))
         lidar_data = np.array(points[:, :2])
-        lidar_data *= min(self.dim) / 100.0
+        lidar_data *= min(self.dim) / (2.0 * self.lidar_range)
         lidar_data += (0.5 * self.dim[0], 0.5 * self.dim[1])
         lidar_data = np.fabs(lidar_data)  # pylint: disable=E1111
         lidar_data = lidar_data.astype(np.int32)
         lidar_data = np.reshape(lidar_data, (-1, 2))
         lidar_img_size = (self.dim[0], self.dim[1], 3)
-        lidar_img = np.zeros((lidar_img_size), dtype=int)
+        lidar_img = np.zeros((lidar_img_size), dtype=np.uint8)
         lidar_img[tuple(lidar_data.T)] = (255, 255, 255)
         self.surface = pygame.surfarray.make_surface(lidar_img)
 
@@ -357,19 +330,22 @@ class SensorManager(object):
         if self.sensor is None:
             if index == -1:
                 print("sensor Camera_Rgb")
-                self.sensor = Camera_Rgb(self.world, self.target, self.args, select_sensor=0, tick=0.0)
+                self.sensor = Camera_Rgb(self.world, self.target, self.args, select_sensor=0)
             elif index == 0:
                 print("sensor Camera_Rgb")
-                self.sensor = Camera_Rgb(self.world, self.target, self.args, select_sensor=0, tick=0.0)
+                self.sensor = Camera_Rgb(self.world, self.target, self.args, select_sensor=0)
             elif index == 1:
                 print("sensor Camera_Depth")
-                self.sensor = Camera_Depth(self.world, self.target, self.args, select_sensor=0, tick=0.0)
+                self.sensor = Camera_Depth(self.world, self.target, self.args, select_sensor=0)
             elif index == 2:
                 print("sensor Camera_Lider")
+                self.sensor = Sensor_Lider(self.world, self.target, self.args, select_sensor=0)
+            elif index == 3:
+                print("sensor Camera_Lider (Semantic)")
                 self.sensor = Sensor_Lider(self.world, self.target, self.args, select_sensor=1)
             return self.sensor
         else:
-            print("sensor is alive")
+            # print("sensor is alive")
             return self.sensor
 
     def recording(self, isRecording):
