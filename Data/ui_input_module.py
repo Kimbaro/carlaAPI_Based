@@ -12,7 +12,7 @@ class UI_INPUT_CONTROL(object):
                 altitude = 90
             elif sun_type == "sunset":
                 azimuth = 330  # 0 - 180
-                altitude = 10  # 90 ~ -90
+                altitude = 20  # 90 ~ -90
             elif sun_type == "midnight":
                 azimuth = 60
                 altitude = -30

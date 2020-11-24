@@ -76,7 +76,7 @@ class Storm(object):
         return 'Rain(rain=%d%%, wetness=%d%%, puddles=%d%%)' % (self.rain, self.wetness, self.puddles)
 
 
-class Weather(object):
+class Weather_Manager(object):
     def __init__(self, weather, world):
         self.weather = weather
         self.world = world

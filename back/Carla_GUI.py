@@ -3,18 +3,15 @@ import os
 import sys
 import argparse
 import logging
-from WeatherManager import Weather_Manager
-import random
-import time
-import json
-import weakref
-import numpy as np
-import datetime
-from blueprintAttribute import TargetActorAttr
 from Data.weather_data import UI_DATA
 import Data.ui_input_module as ui
 from PyQt5.QtWidgets import *
 from PyQt5 import uic
+import WeatherManager
+import random
+import time
+import json
+from blueprintAttribute import TargetActorAttr
 
 try:
     # 파이썬에서 참조할 모듈의 경로 및 설정
@@ -28,272 +25,10 @@ except IndexError:
 
 import carla
 from carla import VehicleLightState as vls
-from carla import ColorConverter as cc
 
 # UI파일 연결
 # 단, UI파일은 Python 코드 파일과 같은 디렉토리에 위치해야한다.
 form_class = uic.loadUiType("Carla_UI.ui")[0]
-
-# @todo 센서 및 설정정보 리스트, 가능하면 아래 배열 형식을 따를 수 있도록해야함.
-# @todo 변수명 self.sensor_option
-# @todo [sensor_bp_id, image_converting_type, description, save dir, {attr_name: attr_value, ....}]
-# @todo LIDAR의 경우 : [sensor_bp_id, save dir, {attr_name: attr_value, ....}]
-
-
-"""
-    Sensor Class 
-"""
-
-
-class Sensor_Lidar:
-    def __init__(self, world, target, config):
-        self.world = world
-        self.bp_library = world.get_blueprint_library()
-        self.target = target
-        self.sensorActor = None
-        self.recording = False
-        self.surface = None  # <- 2020-08-07추가
-        self.dim = (config.width, config.height)
-
-        self.sensor_option = config.sensor_option
-        self.sensor_position = config.sensor_position
-        item = self.sensor_option
-
-        bp_library = world.get_blueprint_library()
-        bp = bp_library.find(item[0])
-        for attr_name, attr_value in item[2].items():
-            bp.set_attribute(attr_name, attr_value)
-            if attr_name == str('range'):
-                print("check=====")
-                self.lidar_range = float(attr_value)
-
-        sensor = self.world.spawn_actor(bp, self.sensor_position, attach_to=self.target)
-        weak_self = weakref.ref(self)
-        sensor.listen(lambda point_cloud: Sensor_Lidar._parse_image(weak_self, point_cloud, item[1]))
-        self.sensorActor = sensor  # 설정된 센서 저장.
-
-    def set_recording(self, check=False):
-        self.recording = check
-
-    def destroy(self):  # target 센서 제거.
-        self.sensorActor.destroy()
-
-    # PyGame 파트 ///////////////////////////////////
-    # @staticmethod
-    # def _parse_pygame(self, image):  # <- 2020-08-07추가
-    #     # pygame set
-    #     points = np.frombuffer(image.raw_data, dtype=np.dtype('f4'))
-    #     points = np.reshape(points, (int(points.shape[0] / 3), 3))
-    #     lidar_data = np.array(points[:, :2])
-    #     lidar_data *= min(self.dim) / (2.0 * self.lidar_range)
-    #     lidar_data += (0.5 * self.dim[0], 0.5 * self.dim[1])
-    #     lidar_data = np.fabs(lidar_data)  # pylint: disable=E1111
-    #     lidar_data = lidar_data.astype(np.int32)
-    #     lidar_data = np.reshape(lidar_data, (-1, 2))
-    #     lidar_img_size = (self.dim[0], self.dim[1], 3)
-    #     lidar_img = np.zeros((lidar_img_size), dtype=np.uint8)
-    #     lidar_img[tuple(lidar_data.T)] = (255, 255, 255)
-    #     self.surface = pygame.surfarray.make_surface(lidar_img)
-
-    @staticmethod
-    def _parse_image(weak_self, image, id):  # <- 2020-08-07추가
-        self = weak_self()
-        # Sensor_Lidar._parse_pygame(self, image)
-        if self.recording:
-            simulation_time = image.timestamp
-            time = datetime.timedelta(seconds=int(simulation_time))
-            time = str(time).replace(':', '-')
-            image.save_to_disk('sensor/' + str(id) + '/%s' % time + '/%08d' % image.frame)
-
-    def render(self, display):  # <- 2020-08-07추가
-        if self.surface is not None:
-            display.blit(self.surface, (0, 0))
-
-
-class Camera_Depth:
-    def __init__(self, world, target, config):
-        self.world = world
-        self.bp_library = world.get_blueprint_library()
-        self.target = target
-        self.sensorActor = None
-        self.recording = False
-        self.surface = None
-
-        self.sensor_option = config.sensor_option
-        self.sensor_position = config.sensor_position
-        item = self.sensor_option
-
-        bp_library = world.get_blueprint_library()
-        bp = bp_library.find(item[0])
-        for attr_name, attr_value in item[4].items():
-            bp.set_attribute(attr_name, attr_value)
-
-        sensor = self.world.spawn_actor(bp, self.sensor_position, attach_to=self.target)
-        weak_self = weakref.ref(self)
-        sensor.listen(lambda image: Camera_Depth._parse_image(weak_self, image, item[1], item[3]))
-        self.sensorActor = sensor  # 설정된 센서 저장.
-
-    def set_recording(self, check=False):
-        self.recording = check
-
-    def destroy(self):  # target 센서 제거.
-        self.sensorActor.destroy()
-
-    # PyGame 파트 ///////////////////////////////////
-    # @staticmethod
-    # def _parse_pygame(self, image, cc):
-    #     # pygame set
-    #     array = np.frombuffer(image.raw_data, dtype=np.dtype("uint8"))
-    #     array = np.reshape(array, (image.height, image.width, 4))
-    #     array = array[:, :, :3]
-    #     array = array[:, :, ::-1]
-    #     self.surface = pygame.surfarray.make_surface(array.swapaxes(0, 1))
-
-    @staticmethod
-    def _parse_image(weak_self, image, cc, id):
-        self = weak_self()
-
-        image.convert(cc)
-        # Camera_Rgb._parse_pygame(self, image, cc)
-        array = np.frombuffer(image.raw_data, dtype=np.dtype("uint8"))
-        array = np.reshape(array, (image.height, image.width, 4))
-        array = array[:, :, :3]
-        array = array[:, :, ::-1]
-
-        # PyGame 파트 ///////////////////////////////////
-        # self.surface = pygame.surfarray.make_surface(array.swapaxes(0, 1))
-
-        if self.recording:
-            simulation_time = image.timestamp
-            time = datetime.timedelta(seconds=int(simulation_time))
-            time = str(time).replace(':', '-')
-            image.save_to_disk('sensor/' + str(id) + '/%s' % time + '/%08d' % image.frame)
-
-    def render(self, display):
-        if self.surface is not None:
-            display.blit(self.surface, (0, 0))
-
-
-class Camera_Rgb:
-    def __init__(self, world, target, config):
-        self.world = world
-        self.bp_library = world.get_blueprint_library()
-        self.target = target
-        self.sensorActor = None
-        self.recording = False
-        self.surface = None
-
-        self.sensor_option = config.sensor_option
-        self.sensor_position = config.sensor_position
-        item = self.sensor_option
-
-        bp_library = world.get_blueprint_library()
-        bp = bp_library.find(item[0])
-        for attr_name, attr_value in item[4].items():
-            bp.set_attribute(attr_name, attr_value)
-
-        sensor = self.world.spawn_actor(bp, self.sensor_position, attach_to=self.target)
-        weak_self = weakref.ref(self)
-        sensor.listen(lambda image: Camera_Rgb._parse_image(weak_self, image, item[1], item[3]))
-        self.sensorActor = sensor  # 설정된 센서 저장.
-
-    def set_recording(self, check=False):
-        self.recording = check
-
-    def destroy(self):  # target 센서 제거.
-        self.sensorActor.destroy()
-
-    @staticmethod
-    def _parse_image(weak_self, image, cc, id):
-        self = weak_self()
-
-        image.convert(cc)
-        # Camera_Rgb._parse_pygame(self, image, cc)
-        array = np.frombuffer(image.raw_data, dtype=np.dtype("uint8"))
-        array = np.reshape(array, (image.height, image.width, 4))
-        array = array[:, :, :3]
-        array = array[:, :, ::-1]
-
-        # PyGame 파트 ///////////////////////////////////
-        # self.surface = pygame.surfarray.make_surface(array.swapaxes(0, 1))
-
-        if self.recording:
-            simulation_time = image.timestamp
-            time = datetime.timedelta(seconds=int(simulation_time))
-            time = str(time).replace(':', '-')
-            image.save_to_disk('sensor/' + str(id) + '/%s' % time + '/%08d' % image.frame)
-
-    # PyGame 파트 ///////////////////////////////////
-    # @staticmethod
-    # def _parse_pygame(self, image, cc):
-    #     # pygame set
-    #     array = np.frombuffer(image.raw_data, dtype=np.dtype("uint8"))
-    #     array = np.reshape(array, (image.height, image.width, 4))
-    #     array = array[:, :, :3]
-    #     array = array[:, :, ::-1]
-    #     self.surface = pygame.surfarray.make_surface(array.swapaxes(0, 1))
-    #
-    # def render(self, display):
-    #     if self.surface is not None:
-    #         display.blit(self.surface, (0, 0))
-
-
-class Sensor_Manager(object):
-    def __init__(self, world, target, config):
-        self.check = False
-        self.index = -1
-        self.world = world
-        self.target = target
-        self.args = config
-        self.sensor = None
-        self.recoding_check = False
-        self.radar_sensor = None
-        self.sensor_imu = None
-        self.sensor_gnss = None
-
-    def set_recording(self, check=False):
-        self.sensor.set_recording(self.recoding_check)
-
-    def recording(self):
-        if self.recoding_check is False:
-            self.recoding_check = True
-            print("녹화시작")
-        elif self.recoding_check is True:
-            self.recoding_check = False
-            print("녹화종료")
-        self.sensor.set_recording(self.recoding_check)
-
-    def select_sensor(self, index=-1, sensor_option=None, sensor_position=None):
-        self.args.sensor_option = sensor_option
-        self.args.sensor_position = sensor_position
-        if self.sensor is None:
-            if index == -1:
-                print("sensor Camera_Rgb")
-                self.sensor = Camera_Rgb(self.world, self.target, self.args)
-            elif index == 0:
-                print("sensor Camera_Rgb")
-                self.sensor = Camera_Rgb(self.world, self.target, self.args)
-            elif index == 1:
-                print("sensor Camera_Depth")
-                self.sensor = Camera_Depth(self.world, self.target, self.args)
-            elif index == 2:
-                print("sensor Lidar")
-                self.sensor = Sensor_Lidar(self.world, self.target, self.args)
-
-            return self.sensor
-        else:
-            return self.sensor
-
-    def destroy(self):
-        self.sensor.destroy()
-        if self.radar_sensor is not None:
-            self.radar_sensor.destroy()
-        if self.sensor_imu is not None:
-            self.sensor_imu.destroy()
-        if self.sensor_gnss is not None:
-            self.sensor_gnss.destroy()
-        self.radar_sensor = None
-        self.sensor = None
 
 
 class NPC_Manager(object):
@@ -452,7 +187,7 @@ class NPC_Manager(object):
 
             count = len(self.walkers_list)
             count_fail = input_number - count
-            print('보행자 %d 오브젝트 충돌, 보행자 %d 스폰' % (count_fail, count))
+            print('보행자 %d 오브젝트 충돌, 보행자 %d 스폰' % (count, count_fail))
 
     def ui_world_npc_vehicle(self, input_number):
         SpawnActor = self.carla_package[0]
@@ -516,7 +251,7 @@ class NPC_Manager(object):
 
             count = len(self.vehicles_list)
             count_fail = input_number - count
-            print('차량 %d 오브젝트 충돌, 차량 %d 스폰' % (count_fail, count))
+            print('차량 %d 오브젝트 충돌, 차량 %d 스폰' % (count, count_fail))
 
 
 # 화면을 띄우는데 사용되는 Class 선언
@@ -578,10 +313,8 @@ class WindowClass(QMainWindow, form_class):
             default=0,
             type=int,
             help='센서수집을 위한 대상 차량 actor_id')
-        argparser.add_argument('--camera', metavar='WIDTHxHEIGHT', default='1280x720', help='카메라 센서 이미지')
 
         self.args = argparser.parse_args()
-        self.args.width, self.args.height = [int(x) for x in self.args.camera.split('x')]
         print(self.args.target_id)
 
         # @todo cannot import these directly.
@@ -599,15 +332,10 @@ class WindowClass(QMainWindow, form_class):
         self.world = self.client.get_world()
         self.target = self.world.get_actor(self.args.target_id)  # 타겟 차량 Actor_id
         print("select vehicle : ", self.target)
-        self._weather = Weather_Manager(self.world.get_weather(), self.world)
+        self._weather = WeatherManager.Weather(self.world.get_weather(), self.world)
         self._npc = NPC_Manager(self.world, self.client, self.args, self.target, self.carla_package)
         self._sun_set = None
         self._weather_set = None
-        self._sensor = None
-        self._sensor_list = []
-        self.sensor_option = None
-        self.sensor_position = None
-        self.sensor_count = 0
 
     # NPC 버튼 클릭 후 값 가져오기
     def NPC_Spawn(self):
@@ -689,27 +417,7 @@ class WindowClass(QMainWindow, form_class):
             Y = int(self.lineEdit_Depth_Y.text())
             Fov = float(self.lineEdit_Depth_Fov.text())
             sensor_tick = float(self.lineEdit_Depth_Time.text())
-            sensor_x = float(self.lineEdit_Location_X.text())
-            sensor_y = float(self.lineEdit_Location_Y.text())
-            sensor_z = float(self.lineEdit_Location_Z.text())
-            sensor_roll = float(self.lineEdit_Rotation_Roll.text())
-            sensor_pitch = float(self.lineEdit_Rotation_Pitch.text())
-            sensor_yaw = float(self.lineEdit_Rotation_Yaw.text())
-            print(X, Y, Fov, sensor_x, sensor_y, sensor_z, sensor_roll, sensor_pitch, sensor_yaw)
-
-            self._sensor = Sensor_Manager(self.world, self.target, self.args)
-            self.sensor_option = ['sensor.camera.depth', cc.Raw, 'Camera Depth', 'depth' + str(self.sensor_count), {
-                'image_size_x': str(X),
-                'image_size_y': str(Y),
-                'fov': str(Fov)
-            }]
-            self.sensor_position = carla.Transform(carla.Location(x=sensor_x, y=sensor_y, z=sensor_z),
-                                                   carla.Rotation(roll=sensor_roll, pitch=sensor_pitch, yaw=sensor_yaw))
-
-            self._sensor.select_sensor(1, self.sensor_option, self.sensor_position)
-            self._sensor_list.append(self._sensor)
-            self.sensor_count = self.sensor_count + 1
-
+            print(X, Y, Fov, sensor_tick)
 
         elif self.tabWidget_Sensor_control.currentIndex() == 2:
             print("Lider")
@@ -720,31 +428,7 @@ class WindowClass(QMainWindow, form_class):
             upper_fov = int(self.lineEdit_Lider_Highest.text())
             lower_fov = int(self.lineEdit_Lider_Lowest.text())
             sensor_tick = int(self.lineEdit_Lider_Time.text())
-            # ==
-            sensor_x = float(self.lineEdit_Location_X.text())
-            sensor_y = float(self.lineEdit_Location_Y.text())
-            sensor_z = float(self.lineEdit_Location_Z.text())
-            sensor_roll = float(self.lineEdit_Rotation_Roll.text())
-            sensor_pitch = float(self.lineEdit_Rotation_Pitch.text())
-            sensor_yaw = float(self.lineEdit_Rotation_Yaw.text())
             print(channels, range, points_per_second, rotation_frequency, upper_fov, lower_fov, sensor_tick)
-
-            self._sensor = Sensor_Manager(self.world, self.target, self.args)
-            self.sensor_option = ['sensor.lidar.ray_cast', 'lidar' + str(self.sensor_count), {
-                'channels': str(channels),
-                'range': str(range),
-                'points_per_second': str(points_per_second),
-                'rotation_frequency': str(rotation_frequency),
-                'upper_fov': str(upper_fov),  # 상단
-                'lower_fov': str(lower_fov),  # 하단
-                'sensor_tick': str(sensor_tick)
-            }]
-            self.sensor_position = carla.Transform(carla.Location(x=sensor_x, y=sensor_y, z=sensor_z),
-                                                   carla.Rotation(roll=sensor_roll, pitch=sensor_pitch, yaw=sensor_yaw))
-
-            self._sensor.select_sensor(2, self.sensor_option, self.sensor_position)
-            self._sensor_list.append(self._sensor)
-            self.sensor_count = self.sensor_count + 1
 
         else:
             print("RGB")
@@ -752,47 +436,23 @@ class WindowClass(QMainWindow, form_class):
             Y = int(self.lineEdit_RGB_Y.text())
             Fov = float(self.lineEdit_RGB_Fov.text())
             sensor_tick = float(self.lineEdit_RGB_Time.text())
-            sensor_x = float(self.lineEdit_Location_X.text())
-            sensor_y = float(self.lineEdit_Location_Y.text())
-            sensor_z = float(self.lineEdit_Location_Z.text())
-            sensor_roll = float(self.lineEdit_Rotation_Roll.text())
-            sensor_pitch = float(self.lineEdit_Rotation_Pitch.text())
-            sensor_yaw = float(self.lineEdit_Rotation_Yaw.text())
-            print(X, Y, Fov, sensor_x, sensor_y, sensor_z, sensor_roll, sensor_pitch, sensor_yaw)
-
-            self._sensor = Sensor_Manager(self.world, self.target, self.args)
-            self.sensor_option = ['sensor.camera.rgb', cc.Raw, 'Camera RGB', 'rgb' + str(self.sensor_count), {
-                'image_size_x': str(X),
-                'image_size_y': str(Y),
-                'fov': str(Fov)
-            }]
-            self.sensor_position = carla.Transform(carla.Location(x=sensor_x, y=sensor_y, z=sensor_z),
-                                                   carla.Rotation(roll=sensor_roll, pitch=sensor_pitch, yaw=sensor_yaw))
-
-            self._sensor.select_sensor(0, self.sensor_option, self.sensor_position)
-            self._sensor_list.append(self._sensor)
-            self.sensor_count = self.sensor_count + 1
+            print(X, Y, Fov, sensor_tick)
 
     def Sensor_Play(self):
         print("센서 데이터 수집")
-        for n, _sensor in enumerate(self._sensor_list):
-            _sensor.recording()
-
-        # self._sensor.recording()
+        sensor_x = float(self.lineEdit_Location_X.text())
+        sensor_y = float(self.lineEdit_Location_Y.text())
+        sensor_z = float(self.lineEdit_Location_Z.text())
+        sensor_roll = float(self.lineEdit_Rotation_Roll.text())
+        sensor_pitch = float(self.lineEdit_Rotation_Pitch.text())
+        sensor_yaw = float(self.lineEdit_Rotation_Yaw.text())
+        print(sensor_x, sensor_y, sensor_z, sensor_roll, sensor_pitch, sensor_yaw)
 
     def Sensor_Stop(self):
         print("센서 종료")
-        for n, _sensor in enumerate(self._sensor_list):
-            _sensor.recording()
-
-        # self._sensor.recording()
 
     # 창 종료시 이벤트 발생
     def closeEvent(self, event):
-        for n, _sensor in enumerate(self._sensor_list):
-            _sensor.destroy()
-
-        # self._sensor.destroy()
         print("test")
 
 
