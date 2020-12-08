@@ -10,7 +10,7 @@ import json
 import weakref
 import numpy as np
 import datetime
-from environment_config_remote.blueprintAttribute import TargetActorAttr
+from environment_config_remote.blueprintAttribute import ActorData_Manager
 from environment_config_remote.Data.weather_data import UI_DATA
 import environment_config_remote.Data.ui_input_module as ui
 from PyQt5.QtWidgets import *
@@ -45,7 +45,7 @@ form_class = uic.loadUiType("environment_config_remote/Carla_UI.ui")[0]
 """
 
 
-class Sensor_Lidar:
+class Sensor_Lidar(object):
     def __init__(self, world, target, config):
         self.world = world
         self.bp_library = world.get_blueprint_library()
@@ -110,7 +110,7 @@ class Sensor_Lidar:
             display.blit(self.surface, (0, 0))
 
 
-class Camera_Depth:
+class Camera_Depth(object):
     def __init__(self, world, target, config):
         self.world = world
         self.bp_library = world.get_blueprint_library()
@@ -174,7 +174,7 @@ class Camera_Depth:
             display.blit(self.surface, (0, 0))
 
 
-class Camera_Rgb:
+class Camera_Rgb(object):
     def __init__(self, world, target, config):
         self.world = world
         self.bp_library = world.get_blueprint_library()
@@ -238,7 +238,7 @@ class Camera_Rgb:
     #         display.blit(self.surface, (0, 0))
 
 
-class Sensor_Manager(object):
+class Sensor_Manager(Camera_Rgb, Camera_Depth, Sensor_Lidar):
     def __init__(self, world, target, config):
         self.check = False
         self.index = -1
@@ -525,7 +525,7 @@ class NPC_Manager(object):
 
 
 # 화면을 띄우는데 사용되는 Class 선언
-class WindowClass(QMainWindow, form_class):
+class WindowClass(QMainWindow, form_class, NPC_Manager, Sensor_Manager, Weather_Manager):
     def __init__(self, ui_data):
         super().__init__()
         self.ui_data = ui_data
@@ -605,11 +605,10 @@ class WindowClass(QMainWindow, form_class):
         print("search target")
 
         # search DCV
-        target_actor_attr = TargetActorAttr(self.world)
+        target_actor_attr = ActorData_Manager(self.world)
+        self.target = target_actor_attr.split()
         # self.target = self.world.get_actor(self.args.target_id)  # 타겟 차량 Actor_id
         # print("select vehicle : ", self.target)
-        self.target = None
-
         self._weather = Weather_Manager(self.world.get_weather(), self.world)
         self._npc = NPC_Manager(self.world, self.client, self.args, self.target, self.carla_package)
         self._sun_set = None
@@ -619,8 +618,6 @@ class WindowClass(QMainWindow, form_class):
         self.sensor_option = None
         self.sensor_position = None
         self.sensor_count = 0
-
-        self.target = target_actor_attr.search_actor_to_attr_value()
 
     # NPC 버튼 클릭 후 값 가져오기
     def NPC_Spawn(self):
@@ -787,7 +784,7 @@ class WindowClass(QMainWindow, form_class):
             self.sensor_count = self.sensor_count + 1
 
     def Sensor_Play(self):
-        print("센서 데이터 수집",self.target)
+        print("센서 데이터 수집", self.target)
         for n, _sensor in enumerate(self._sensor_list):
             _sensor.recording()
 

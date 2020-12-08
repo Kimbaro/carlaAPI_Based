@@ -23,6 +23,7 @@ from data_collection_vehicle_remote.util.VehicleRouteManager import VehicleRoute
 import argparse
 import random
 import math
+import time
 
 try:
     import pygame
@@ -57,7 +58,6 @@ import data_collection_vehicle_remote.util.no_rendering_package.no_rendering_uti
 
 def main():
     """Parses the arguments received from commandline and runs the game loop"""
-
     # Define arguments that will be received and parsed
     argparser = argparse.ArgumentParser(
         description='CARLA No Rendering Mode Visualizer')
@@ -147,7 +147,6 @@ def main():
         # blueprint.set_attribute('role_name', target_actor_attr.remote_false)
         blueprint.set_attribute('role_name', "target")
         target = world.try_spawn_actor(blueprint, spawnpoint)
-
         # modules init
         input_control = key_util.InputControl("input control title", world, map)
         hud = hud_util.HUD_Main("hud title", args.width, args.height)
@@ -159,13 +158,16 @@ def main():
 
         # modules start
         input_control.start(hud, rendering_world)
+        print("system : check input_control")
         hud.start()
+        print("system : check hud")
         rendering_world.start(hud, input_control)
+        print("system : check rendering_world")
 
         # Game loop
         clock = pygame.time.Clock()
         while True:
-            clock.tick_busy_loop(60)
+            clock.tick_busy_loop(20)
 
             # Tick all modules
             routeManager.tick(target)
@@ -179,6 +181,7 @@ def main():
             hud.render(display)
             input_control.render(display)
             pygame.display.flip()
+
     except KeyboardInterrupt:
         print('\nCancelled by user. Bye!')
     finally:

@@ -9,7 +9,7 @@ def clamp(value, minimum=0.0, maximum=100.0):
     return max(minimum, min(value, maximum))
 
 
-class Sun(object):
+class Sun():
     def __init__(self, sun_azimuth_angle, sun_altitude_angle):
         self.azimuth = sun_azimuth_angle
         self.altitude = sun_altitude_angle
@@ -30,7 +30,7 @@ class Sun(object):
         return 'Sun(alt: %.2f, azm: %.2f)' % (self.altitude, self.azimuth)
 
 
-class Storm(object):
+class Storm():
     def __init__(self, precipitation):
         self._t = precipitation if precipitation > 0.0 else -50.0
         self._increasing = True
@@ -76,7 +76,7 @@ class Storm(object):
         return 'Rain(rain=%d%%, wetness=%d%%, puddles=%d%%)' % (self.rain, self.wetness, self.puddles)
 
 
-class Weather_Manager(object):
+class Weather_Manager():
     def __init__(self, weather, world):
         self.weather = weather
         self.world = world

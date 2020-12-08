@@ -20,7 +20,7 @@ from data_collection_vehicle_remote.agents.navigation.types_behavior import Caut
 from data_collection_vehicle_remote.agents.tools.misc import get_speed, positive, draw_waypoints
 
 
-class BehaviorAgent(Agent):
+class BehaviorAgent(Agent, GlobalRoutePlanner):
     """
     BehaviorAgent implements an agent that navigates scenes to reach a given
     target destination, by computing the shortest possible path to it.
@@ -121,7 +121,7 @@ class BehaviorAgent(Agent):
         if self.direction is None:
             self.direction = RoadOption.LANEFOLLOW
 
-        self.look_ahead_steps = int((self.speed_limit) / 10)
+        self.look_ahead_steps = int((self.speed_limit) / 5)
 
         self.incoming_waypoint, self.incoming_direction = self._local_planner.get_incoming_waypoint_and_direction(
             steps=self.look_ahead_steps)
@@ -164,11 +164,11 @@ class BehaviorAgent(Agent):
         """
         target_location = self.vehicle.get_location()
         target_route_trace_wp = self.map.get_waypoint(target_location)
-        wp_next = get_speed(self.vehicle) * 0.6
+        wp_next = get_speed(self.vehicle) + 0.1 * 1.5
         start = target_route_trace_wp.next(wp_next)
-        end = target_route_trace_wp.next(wp_next + 50)
-        print("select start node : ", start, len(start))
+        end = target_route_trace_wp.next(wp_next + 30)
         if len(start) > 1:
+            # 시작 경로상 진행 방향이 두개 이상인 경우
             destination_s = random.choice(start).transform.location
             destination_e = end[0].transform.location
         else:
@@ -184,16 +184,12 @@ class BehaviorAgent(Agent):
         """
         target_location = self.vehicle.get_location()
         target_route_trace_wp = self.map.get_waypoint(target_location)
-        wp_next = get_speed(self.vehicle) * 0.6
+        wp_next = get_speed(self.vehicle) + 0.1 * 1.5
         start = target_route_trace_wp.next(wp_next)
         end = end_point
-        print("select start node : ", start, len(start))
-        if len(start) > 1:
-            destination_s = random.choice(start).transform.location
-            destination_e = end[0].transform.location
-        else:
-            destination_s = start[0].transform.location
-            destination_e = end[0].transform.location
+        print("system : select start node : ", start, len(start))
+        destination_s = start[0].transform.location
+        destination_e = end[0].transform.location
 
         self.set_destination(destination_s, destination_e)
         return self._trace_route(start[0], end[0])

@@ -4,14 +4,15 @@ import sys
 import data_collection_vehicle_remote.util.Drawing_Point as drawing_point
 from data_collection_vehicle_remote.util.Sort import Stack
 from data_collection_vehicle_remote.agents.navigation.basic_agent import BasicAgent
-from data_collection_vehicle_remote.agents.navigation.behavior_agent import BehaviorAgent  # pylint: disable=import-error
+from data_collection_vehicle_remote.agents.navigation.behavior_agent import \
+    BehaviorAgent  # pylint: disable=import-error
 
 import random
 
 import sys
 
 
-class VehicleRouteManager:
+class VehicleRouteManager(BehaviorAgent):
     def __init__(self, world, map, target, speed=20.0, start_POI=None, end_POI=None):
         self.world = world
         self.map = map
@@ -40,7 +41,7 @@ class VehicleRouteManager:
         True : 신호무시
         False : 
         """
-        self.agent = BehaviorAgent(target, ignore_traffic_light=False, behavior='normal')  # 타겟차량, 신호따름, 보통주행
+        self.agent = BehaviorAgent(target, ignore_traffic_light=False, behavior='cautious')  # 타겟차량, 신호따름, 보통주행
         self.control = None  # carla.VehicleControl, 차량의 세부 제어.
         self.routeDestinationList = Stack()  # 경유지 목록
         self.routePlannerList = []
@@ -71,7 +72,6 @@ class VehicleRouteManager:
                     print("system : 목적지없음. 임의 목적지 루트플랜 작성. (", self.test_count)
                     route = self.agent.reroute_auto()
                     self.routePlannerList = route  # 시작점과 끝나는 지점의 Waypoint list 를 반환
-                    # print(route[0], route[1])
                 else:  # 사용자가 선택한 임의 목적지로 경로 할당
                     end = [self.routeDestinationList.pop(0)]
                     route = self.agent.reroute_self(end)

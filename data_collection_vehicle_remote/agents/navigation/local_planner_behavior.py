@@ -47,7 +47,7 @@ class LocalPlanner(object):
     # (e.g. within 80% of total distance)
 
     # FPS used for dt
-    FPS = 30
+    FPS = 20
 
     def __init__(self, agent):
         """
@@ -103,19 +103,19 @@ class LocalPlanner(object):
             'K_I': 0.4,
             'dt': 1.0 / self.FPS}
         self.args_lat_city_dict = {
-            'K_P': 0.68,
+            'K_P': 0.58,
             'K_D': 0.4,
             'K_I': 0.5,
-            'dt': 0.5 / self.FPS}
+            'dt': 1.0 / self.FPS}
         self.args_long_hw_dict = {
             'K_P': 0.37,
             'K_D': 0.024,
             'K_I': 0.032,
             'dt': 1.0 / self.FPS}
         self.args_long_city_dict = {
-            'K_P': 0.15,
-            'K_D': 0.05,
-            'K_I': 0.07,
+            'K_P': 0.1,
+            'K_D': 0.02,
+            'K_I': 0.05,
             'dt': 1.0 / self.FPS}
 
         # self.args_long_city_dict = {
@@ -136,7 +136,7 @@ class LocalPlanner(object):
 
         self._target_speed = self._vehicle.get_speed_limit()
 
-        self._min_distance = 3
+        self._min_distance = 5
 
     def set_speed(self, speed):
         """
@@ -219,10 +219,11 @@ class LocalPlanner(object):
         self.target_waypoint, self.target_road_option = self._waypoint_buffer[0]
 
         if target_speed > 50:
+            #print("system : 고속도로에 진입합니다.")
             args_lat = self.args_lat_hw_dict
             args_long = self.args_long_hw_dict
         else:
-
+            #print("system : 일반도로에 진입합니다.")
             args_lat = self.args_lat_city_dict
             args_long = self.args_long_city_dict
 
