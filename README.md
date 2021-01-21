@@ -5,4 +5,5 @@ Design and Implementation of Open Source Based Autonomous Driving Simulation Ref
 Preview
 ===================================
 Blog Post - https://kimbaro.github.io/2021/01/18/Carla-simulator/
+
 Paper - https://github.com/Kimbaro/kimbaro.github.io/blob/master/images/Carla-simulator/Academic-conference-paper.pdf
